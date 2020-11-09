@@ -18,6 +18,13 @@ vzorec_igre = re.compile(
     flags=re.DOTALL
 )
 
+vzorec_ratinga = re.compile(
+    r'<th scope="row">Rating:</th>\s*?<td>(?P<oznaka>.+?)</td>.*?',
+    flags=re.DOTALL
+)
+
+
+
 najdene_igre = 0
 igre = []
 video_igre = 0
