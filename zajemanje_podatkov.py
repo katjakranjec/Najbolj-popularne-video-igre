@@ -33,6 +33,12 @@ vzorec_zanrov = re.compile(
     flags=re.DOTALL
 )
 
+vzorec_stevilo_online_igralcev = re.compile(
+    r'<tr><th scope="row">Number of Online Players:</th>\s*?<td>(?P<stevilo_online_igralcev>.+?)</td>.*?',
+    flags=re.DOTALL
+)
+
+
 najdene_igre = 0
 igre = []
 video_igre = 0
