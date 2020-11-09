@@ -33,11 +33,25 @@ vzorec_zanrov = re.compile(
     flags=re.DOTALL
 )
 
-vzorec_stevilo_online_igralcev = re.compile(
+vzorec_stevila_online_igralcev = re.compile(
     r'<tr><th scope="row">Number of Online Players:</th>\s*?<td>(?P<stevilo_online_igralcev>.+?)</td>.*?',
     flags=re.DOTALL
 )
 
+vzorec_also_on = re.compile(
+    r'<span class="label">Also On:</span>.*?class="hover_none">(?P<also_on>,+?)</a>.*?',
+    flags=re.DOTALL
+)
+
+vzorec_ESRB_deskriptorjev = re.compile(
+    r'<th scope="row">ESRB Descriptors:</th>\s*?<td>(?P<ESRB_deskriptorji>.+?)</td>.*?',
+    flags=re.DOTALL
+)
+
+vzorec_stevila_igralcev = re.compile(
+    r'<th scope="row">Number of Players:</th>\s*?<td>(?P<stevilo_igralcev>.+?)</td>.*?',
+    flags=re.DOTALL
+)
 
 najdene_igre = 0
 igre = []
