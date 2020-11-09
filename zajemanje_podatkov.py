@@ -8,7 +8,7 @@ vzorec_povezave = (r'<a href="(?P<povezava>.*?)" class="title"><h3>(?P<naslov>.*
 vzorec_igre = re.compile(
     r'<div class="product_title">.*?<h1>(?P<naslov>.+?)</h1>.*?'
     r'<span class="platform">\s*(<a href=.*?>)?\s*(?P<platforma>.+?)\s{2}.*?</span>.*?'
-    r'<span class="label">Publisher:</span>\s*?<span class="data">\s*(<a href=.*?>)?\s*(?P<podjetje>.+?)\s{2}.*?'
+    r'<span class="label">Publisher:</span>\s*?<span class="data">\s*(<a href=.*?>)?\s*(?P<publisher>.+?)\s{2}.*?'
     r'<span class="label">Release Date:</span>\s*?<span class="data" >(?P<datum>.+?)</span>.*?'
     r'<div class="label">Metascore</div>.*?<span>(?P<metascore>\d{2})</span>.*?'
     r'<span class="based">based on</span>\s*?.*?(?P<stevilo_glasov_metascore>\d+)\s*?</span> Critic Reviews.*?'
@@ -23,7 +23,15 @@ vzorec_ratinga = re.compile(
     flags=re.DOTALL
 )
 
+vzorec_developerja = re.compile(
+    r'<th scope="row">Developer:</th>\s*?<td>(?P<developer>.+?)</td>.*?',
+    flags=re.DOTALL
+)
 
+vzorec_zanrov = re.compile(
+    r'<th scope="row">Genre(s):</th>\s*?<td>(?P<zanri>.+?)</td>.*?',
+    flags=re.DOTALL
+)
 
 najdene_igre = 0
 igre = []
