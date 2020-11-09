@@ -5,7 +5,7 @@ import json
 
 vzorec_povezave = (r'<a href="(?P<povezava>.*?)" class="title"><h3>(?P<naslov>.*?)</h3></a>')
 
-vzorec_filma = re.compile(
+vzorec_igre = re.compile(
     r'<div class="product_title">.*?<h1>(?P<naslov>.+?)</h1>.*?'
     r'<span class="platform">\s*(<a href=.*?>)?\s*(?P<platforma>.+?)\s{2}.*?</span>.*?'
     r'<span class="label">Publisher:</span>\s*?<span class="data">\s*(<a href=.*?>)?\s*(?P<podjetje>.+?)\s{2}.*?'
