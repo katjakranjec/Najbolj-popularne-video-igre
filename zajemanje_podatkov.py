@@ -102,12 +102,13 @@ def izloci_podatke(vsebina):
     return igra
 
 
-
-najdene_igre = 0
-igre = []
-video_igre = 0
 STEVILO_STRANI = 1
+
+igre_s_povezavami = []
+najdene_video_igre_s_povezavami = 0
+
 najdene_video_igre = 0
+
 
 
 for stran in range(STEVILO_STRANI):
@@ -122,24 +123,24 @@ for stran in range(STEVILO_STRANI):
     vsebina = orodja.vsebina_datoteke(datoteka)
 
     for zadetek in re.finditer(vzorec_povezave, vsebina):
-        igre.append(zadetek.groupdict())
-        najdene_igre += 1
+        igre_s_povezavami.append(zadetek.groupdict())
+        najdene_video_igre_s_povezavami += 1
 
 datoteka_s_slovarjem = 'povezave-do-iger.json'
 with open(datoteka_s_slovarjem, 'w', encoding='utf-8') as f:
-    json.dump(igre, f)
+    json.dump(igre_s_povezavami, f)
 
-print(najdene_igre)
+print(najdene_video_igre_s_povezavami)
 
 with open(datoteka_s_slovarjem, 'r', encoding='utf-8') as f:
     igre = json.load(f)
     for igra in igre:
-        video_igre +=1
+        najdene_video_igre +=1
         povezava = igra.get("povezava")
         url = f'https://www.metacritic.com{povezava}/details'
-        datoteka = f'najbolj-znane-video-igre/video-igra{video_igre}.html'
+        datoteka = f'najbolj-znane-video-igre/video-igra{najdene_video_igre}.html'
         orodja.shrani_spletno_stran(url, datoteka)
         vsebina = orodja.vsebina_datoteke(datoteka)
 
-        print(izloci_podatke(vsebina))
-print(video_igre)
+        #print(izloci_podatke(vsebina))
+print(najdene_video_igre)
