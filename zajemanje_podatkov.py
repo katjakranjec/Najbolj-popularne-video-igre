@@ -111,6 +111,21 @@ def izloci_podatke(vsebina):
 
     return igra
 
+def izloci_gnezdene_podatke(igre):
+    platforme, zanri, ESRB = [], [], []
+
+    for igra in igre:
+        for platforma in igra['platforma']:
+            platforme.append({'naslov': igra['naslov'], 'platforma': platforma})
+        for platforma in igra['also_on']:
+            platforme.append({'naslov': igra['naslov'], 'platforma': platforma})
+        for zanr in igra['zanri']:
+            zanri.append({'naslov': igra['naslov'], 'zanr': zanr})
+        for deskriptor in igra['ESRB_deskriptorji']:
+            ESRB.append({'naslov': igra['naslov'], 'ESRB_deskriptor': deskriptor})
+
+    return platforme, zanri, ESRB
+
 
 STEVILO_STRANI = 102
 
