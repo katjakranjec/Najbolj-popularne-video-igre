@@ -30,7 +30,7 @@ vzorec_developerja = re.compile(
 )
 
 vzorec_zanrov = re.compile(
-    r'<th scope="row">Genre(s):</th>\s*?<td>(?P<zanri>.+?)</td>.*?',
+    r'<th scope="row">Genre.s.:</th>\s*?<td>\s{2}(?P<zanri>.*?)</td>.*?',
     flags=re.DOTALL
 )
 
@@ -40,7 +40,7 @@ vzorec_stevila_online_igralcev = re.compile(
 )
 
 vzorec_also_on = re.compile(
-    r'<span class="label">Also On:</span>.*?class="hover_none">(?P<also_on>,+?)</a>.*?',
+    r'<span class="label">Also On:</span>.*?(class="hover_none">(?P<also_on>.+?))+</a>.*?',
     flags=re.DOTALL
 )
 
@@ -74,8 +74,9 @@ def izloci_podatke(vsebina):
     else:
         igra['developer'] = None
     zanri = vzorec_zanrov.search(vsebina)
+    print(zanri)
     if zanri:
-        igra['zanri'] = 'nekej'
+        igra['zanri'] = zanri['zanri'].replace('  ', '').split(',')
     else:
         igra['zanri'] = []
     stevilo_online_igralcev = vzorec_stevila_online_igralcev.search(vsebina)
@@ -142,7 +143,4 @@ with open(datoteka_s_slovarjem, 'r', encoding='utf-8') as f:
         vsebina = orodja.vsebina_datoteke(datoteka)
 
         print(izloci_podatke(vsebina))
-
-        #for zadetek in re.finditer(vzorec_filma, vsebina):
-         #   print(zadetek.groupdict())
-          #  najdene_video_igre += 1
+print(video_igre)
