@@ -40,7 +40,12 @@ vzorec_stevila_online_igralcev = re.compile(
 )
 
 vzorec_also_on = re.compile(
-    r'<span class="label">Also On:</span>.*?(class="hover_none">(?P<also_on>.+?))+</a>.*?',
+    r'<span class="label">Also On:</span>.*?class="hover_none"(?P<also_on>.*?)</span>.*?',
+    flags=re.DOTALL
+)
+
+vzorec_also_on2 = re.compile(
+    r'class="hover_none">(?P<also_on2>.+?)<.*?',
     flags=re.DOTALL
 )
 
@@ -83,11 +88,13 @@ def izloci_podatke(vsebina):
         igra['stevilo_online_igralcev'] = stevilo_online_igralcev['stevilo_online_igralcev']
     else:
         igra['stevilo_online_igralcev'] = None
-    also_on = vzorec_also_on.search(vsebina)
+    also_on = vzorec_also_on.findall(vsebina)
+    also_on1 = str(also_on)
+    also_on2 = vzorec_also_on2.findall(also_on1)
     if also_on:
-        igra['also_on'] = also_on['also_on']
+        igra['also_on'] = also_on2
     else:
-        igra['also_on'] = None
+        igra['also_on'] = []
     ESRB = vzorec_ESRB_deskriptorjev.search(vsebina)
     if ESRB:
         igra['ESRB_deskriptorji'] = ESRB['ESRB_deskriptorji']
@@ -102,7 +109,7 @@ def izloci_podatke(vsebina):
     return igra
 
 
-STEVILO_STRANI = 1
+STEVILO_STRANI = 102
 
 igre_s_povezavami = []
 najdene_video_igre_s_povezavami = 0
@@ -119,7 +126,7 @@ for stran in range(STEVILO_STRANI):
         stevilka_strani = stran + 1
         url = f'https://www.metacritic.com/browse/games/score/metascore/all/all?page={stran}'
         datoteka = f'najbolj-znane-video-igre/seznam-iger{stevilka_strani}.html' 
-    orodja.shrani_spletno_stran(url, datoteka)
+    #orodja.shrani_spletno_stran(url, datoteka)
     vsebina = orodja.vsebina_datoteke(datoteka)
 
     for zadetek in re.finditer(vzorec_povezave, vsebina):
@@ -139,8 +146,9 @@ with open(datoteka_s_slovarjem, 'r', encoding='utf-8') as f:
         povezava = igra.get("povezava")
         url = f'https://www.metacritic.com{povezava}/details'
         datoteka = f'najbolj-znane-video-igre/video-igra{najdene_video_igre}.html'
-        orodja.shrani_spletno_stran(url, datoteka)
+        #orodja.shrani_spletno_stran(url, datoteka)
         vsebina = orodja.vsebina_datoteke(datoteka)
 
-        #print(izloci_podatke(vsebina))
+        print(izloci_podatke(vsebina))
+
 print(najdene_video_igre)
