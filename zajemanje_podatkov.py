@@ -74,7 +74,6 @@ def izloci_podatke(vsebina):
     else:
         igra['developer'] = None
     zanri = vzorec_zanrov.search(vsebina)
-    print(zanri)
     if zanri:
         igra['zanri'] = zanri['zanri'].replace('  ', '').split(',')
     else:
@@ -117,8 +116,8 @@ for stran in range(STEVILO_STRANI):
         datoteka = f'najbolj-znane-video-igre/seznam-iger1.html' 
     else:
         stevilka_strani = stran + 1
-        url = f'https://www.metacritic.com/browse/games/score/metascore/all/all?page={stevilka_strani}'
-        datoteka = f'najbolj-znane-video-igre/seznam-iger{stevilka_strani + 1}.html' 
+        url = f'https://www.metacritic.com/browse/games/score/metascore/all/all?page={stran}'
+        datoteka = f'najbolj-znane-video-igre/seznam-iger{stevilka_strani}.html' 
     orodja.shrani_spletno_stran(url, datoteka)
     vsebina = orodja.vsebina_datoteke(datoteka)
 
