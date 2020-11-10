@@ -59,6 +59,15 @@ vzorec_stevila_igralcev = re.compile(
     flags=re.DOTALL
 )
 
+deskriptorji = ['Alcohol Reference', 'Animated Blood', 'Blood', 'Blood and Gore', 'Cartoon violence', 'Comic Mischief', 'Crude Humor', 'Drug Reference', 'Edutainment', 'Fantasy Violence', 'Informational', 'Intense Violence', 'Language', 'Lyrics', 'Mature Humor', 'Mild Violence', 'Nudity', 'Partial Nudity', 'Real Gambling', 'Sexual Content', 'Sexual Themes', 'Sexual Violence', 'Simulated Gambling', 'Some Adult Assistance May Be Needed', 'Strong Language', 'Strong Lyrics', 'Strong Sexual Content', 'Suggestive Themes', 'Tobacco Reference', 'Use of Drugs', 'Use of Alcohol', 'Use of Tobacco', 'Violence']
+
+def izloci_deskriptorje(niz, deskriptorji):
+    ESRBdes = []
+    for deskriptor in deskriptorji:
+        if deskriptor in niz:
+            ESRBdes.append(deskriptor)
+    return ESRBdes
+
 def izloci_podatke(vsebina):
     igra = vzorec_igre.search(vsebina).groupdict()
     string = igra['datum'].replace(',', '')
@@ -91,15 +100,9 @@ def izloci_podatke(vsebina):
     also_on = vzorec_also_on.findall(vsebina)
     also_on1 = str(also_on)
     also_on2 = vzorec_also_on2.findall(also_on1)
-    if also_on:
-        igra['also_on'] = also_on2
-    else:
-        igra['also_on'] = []
-    ESRB = vzorec_ESRB_deskriptorjev.search(vsebina)
-    if ESRB:
-        igra['ESRB_deskriptorji'] = ESRB['ESRB_deskriptorji']
-    else:
-        igra['ESRB_deskriptorji'] = None
+    igra['also_on'] = also_on2
+    ESRB = vzorec_ESRB_deskriptorjev.findall(vsebina)
+    igra['ESRB_deskriptorji'] = izloci_deskriptorje(str(ESRB), deskriptorji)
     stevilo_igralcev = vzorec_stevila_igralcev.search(vsebina)
     if stevilo_igralcev:
         igra['stevilo_igralcev'] = stevilo_igralcev['stevilo_igralcev']
