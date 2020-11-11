@@ -3,21 +3,53 @@ import re
 import requests
 import json
 from datetime import datetime
+import csv
 
 vzorec_povezave = (r'<a href="(?P<povezava>.*?)" class="title"><h3>(?P<naslov>.*?)</h3></a>')
 
 vzorec_igre = re.compile(
     r'<div class="product_title">.*?<h1>(?P<naslov>.+?)</h1>.*?'
     r'<span class="platform">\s*(<a href=.*?>)?\s*(?P<platforma>.+?)\s{2}.*?</span>.*?'
-    r'<span class="label">Publisher:</span>\s*?<span class="data">\s*(<a href=.*?>)?\s*(?P<publisher>.+?)\s{2}.*?'
-    r'<span class="label">Release Date:</span>\s*?<span class="data" >(?P<datum>.+?)</span>.*?'
-    r'<div class="label">Metascore</div>.*?<span>(?P<metascore>\d{2})</span>.*?'
-    r'<span class="based">based on</span>\s*?.*?(?P<stevilo_glasov_metascore>\d+)\s*?</span> Critic Reviews.*?'
-    r'<div class="label">User Score</div>.*?(?P<ocena_uporabnikov>\d\.\d)</div>.*?'
-    r'<span class="based">based on</span>\s*?.*?(?P<stevilo_glasov_uporabnikov>\d+)\sRatings.*?'
-    r'<span class="label">Summary:</span>\s*?<span class="data" >(?P<opis>.+?)</span>.*?',
+    r'<span class="label">Release Date:</span>\s*?<span class="data" >(?P<datum>.+?)</span>.*?',
     flags=re.DOTALL
 )
+
+#r'<span class="label">Publisher:</span>\s*?<span class="data">\s*(<a href=.*?>)?\s*(?P<publisher>.+?)\s{2}.*?'
+
+vzorec_metascora = re.compile(
+    r'<div class="label">Metascore</div>.*?<span>(?P<metascore>\d{2})</span>.*?',
+    flags=re.DOTALL
+)
+
+vzorec_stevila_glasov_metascore = re.compile(
+    r'<span class="based">based on</span>\s*?.*?(?P<stevilo_glasov_metascore>\d+)\s*?</span> Critic Reviews.*?',
+    flags=re.DOTALL
+)
+
+vzorec_publisherja = re.compile(
+    r'<span class="label">Publisher:</span>\s*?<span class="data">\s*(?P<publisher>.+?)</span>.*?',
+    flags=re.DOTALL
+)
+
+vzorec_publisherja2 = re.compile(
+    r'>\\n\s*(?P<publisher2>.+?)\\n.*?',
+    flags=re.DOTALL
+)
+
+vzorec_ocene_uporabnikov = re.compile(
+    r'<div class="label">User Score</div>.*?(?P<ocena_uporabnikov>\d\.\d)</div>.*?',
+    flags=re.DOTALL
+)
+
+vzorec_stevila_glasov_uporabnikov = re.compile(
+    r'<span class="based">based on</span>\s*?.*?(?P<stevilo_glasov_uporabnikov>\d+)\sRatings.*?',
+    flags=re.DOTALL
+)
+
+#vzorec_opisa = re.compile(
+#    r'<span class="label">Summary:</span>\s*?<span class="data" >(?P<opis>.+?)</span>.*?',
+#    flags=re.DOTALL
+#)
 
 vzorec_ratinga = re.compile(
     r'<th scope="row">Rating:</th>\s*?<td>(?P<oznaka>.+?)</td>.*?',
@@ -35,7 +67,7 @@ vzorec_zanrov = re.compile(
 )
 
 vzorec_stevila_online_igralcev = re.compile(
-    r'<tr><th scope="row">Number of Online Players:</th>\s*?<td>(?P<stevilo_online_igralcev>.+?)</td>.*?',
+    r'<tr><th scope="row">Number of Online Players:</th>\s*?<td>(?P<stevilo_online_igralcev>.*?)</td>.*?',
     flags=re.DOTALL
 )
 
@@ -50,12 +82,12 @@ vzorec_also_on2 = re.compile(
 )
 
 vzorec_ESRB_deskriptorjev = re.compile(
-    r'<th scope="row">ESRB Descriptors:</th>\s*?<td>(?P<ESRB_deskriptorji>.+?)</td>.*?',
+    r'<th scope="row">ESRB Descriptors:</th>\s*?<td>(?P<ESRB_deskriptorji>.*?)</td>.*?',
     flags=re.DOTALL
 )
 
 vzorec_stevila_igralcev = re.compile(
-    r'<th scope="row">Number of Players:</th>\s*?<td>(?P<stevilo_igralcev>.+?)</td>.*?',
+    r'<th scope="row">Number of Players:</th>\s*?<td>(?P<stevilo_igralcev>.*?)</td>.*?',
     flags=re.DOTALL
 )
 
@@ -74,10 +106,30 @@ def izloci_podatke(vsebina):
         string = igra['datum'].replace(',', '')
         date = datetime.strptime(string, '%b %d %Y').date()
         igra['datum'] = date
-        igra['metascore'] = int(igra['metascore'])
-        igra['stevilo_glasov_metascore'] = int(igra['stevilo_glasov_metascore'])
-        igra['ocena_uporabnikov'] = float(igra['ocena_uporabnikov'])
-        igra['stevilo_glasov_uporabnikov'] = int(igra['stevilo_glasov_uporabnikov'])
+        metascore = vzorec_metascora.search(vsebina)
+        if metascore:
+            igra['metascore'] = int(metascore['metascore'])
+        else:
+            igra['metascore'] = None
+        stevilo_glasov_metascore = vzorec_stevila_glasov_metascore.search(vsebina)
+        if stevilo_glasov_metascore:
+            igra['stevilo_glasov_metascore'] = int(stevilo_glasov_metascore['stevilo_glasov_metascore'])
+        else:
+            igra['stevilo_glasov_metascore'] = None
+        publisher = vzorec_publisherja.findall(vsebina)
+        publisher1 = str(publisher)
+        publisher2 = vzorec_publisherja2.findall(publisher1)
+        igra['publisher'] = publisher2
+        ocena_uporabnikov = vzorec_ocene_uporabnikov.search(vsebina)
+        if ocena_uporabnikov:
+            igra['ocena_uporabnikov'] = float(ocena_uporabnikov['ocena_uporabnikov'])
+        else:
+            igra['ocena_uporabnikov'] = None
+        stevilo_glasov_uporabnikov = vzorec_stevila_glasov_uporabnikov.search(vsebina)
+        if stevilo_glasov_uporabnikov:
+            igra['stevilo_glasov_uporabnikov'] = int(stevilo_glasov_uporabnikov['stevilo_glasov_uporabnikov'])
+        else:
+            igra['stevilo_glasov_uporabnikov'] = None
         oznaka = vzorec_ratinga.search(vsebina)
         if oznaka:
             igra['oznaka'] = oznaka['oznaka']
@@ -109,23 +161,25 @@ def izloci_podatke(vsebina):
             igra['stevilo_igralcev'] = stevilo_igralcev['stevilo_igralcev']
         else:
             igra['stevilo_igralcev'] = None
-
         return igra
+    else:
+        return None
 
 def izloci_gnezdene_podatke(igre):
-    platforme, zanri, ESRB = [], [], []
+    publisherji, platforme, zanri, ESRB = [], [], [], []
 
     for igra in igre:
-        for platforma in igra['platforma']:
+        for publisher in igra.pop('publisher'):
+            publisherji.append({'naslov': igra['naslov'], 'publisher': publisher})
+        platforme.append({'naslov': igra['naslov'], 'platforma': igra.pop('platforma')})
+        for platforma in igra.pop('also_on'):
             platforme.append({'naslov': igra['naslov'], 'platforma': platforma})
-        for platforma in igra['also_on']:
-            platforme.append({'naslov': igra['naslov'], 'platforma': platforma})
-        for zanr in igra['zanri']:
+        for zanr in igra.pop('zanri'):
             zanri.append({'naslov': igra['naslov'], 'zanr': zanr})
-        for deskriptor in igra['ESRB_deskriptorji']:
+        for deskriptor in igra.pop('ESRB_deskriptorji'):
             ESRB.append({'naslov': igra['naslov'], 'ESRB_deskriptor': deskriptor})
 
-    return platforme, zanri, ESRB
+    return publisherji, platforme, zanri, ESRB
 
 
 STEVILO_STRANI = 102
@@ -167,15 +221,19 @@ with open(datoteka_s_slovarjem, 'r', encoding='utf-8') as f:
         datoteka = f'najbolj-znane-video-igre/video-igra{najdene_video_igre}.html'
         #orodja.shrani_spletno_stran(url, datoteka)
         vsebina = orodja.vsebina_datoteke(datoteka)
-        seznam_slovarjev_iger.append(izloci_podatke(vsebina))
-        #print(seznam_slovarjev_iger)
+        if izloci_podatke(vsebina):
+            seznam_slovarjev_iger.append(izloci_podatke(vsebina))
+        else:
+            pass
+        print(najdene_video_igre)
+        
 
-print(najdene_video_igre)
 
-#platforme, zanri, ESRB = izloci_gnezdene_podatke(seznam_slovarjev_iger)
-#print(platforme)
+publisherji, platforme, zanri, ESRB = izloci_gnezdene_podatke(seznam_slovarjev_iger)
+#print(publisherji)
 
-orodja.zapisi_csv(seznam_slovarjev_iger, ['naslov', 'publisher', 'datum', 'metascore', 'stevilo_glasov_metascore', 'ocena_uporabnikov', 'stevilo_glasov_uporabnikov', 'opis', 'oznaka', 'developer', 'stevilo_online_igralcev', 'stevilo_igralcev'], 'obdelani-podatki/videoigre.csv')
-#orodja.zapisi_csv(platforme, ['naslov', 'platforma'], 'obdelani-podatki/platforme.csv')
-#orodja.zapisi_csv(zanri, ['naslov', 'zanr'], 'obdelani-podatki/zanri.csv')
-#orodja.zapisi_csv(ESRB, ['naslov', 'ESRB_deskriptor'], 'obdelani-podatki/ESRB-deskriptorji.csv')
+orodja.zapisi_csv(seznam_slovarjev_iger, ['naslov', 'datum', 'metascore', 'stevilo_glasov_metascore', 'ocena_uporabnikov', 'stevilo_glasov_uporabnikov', 'oznaka', 'developer', 'stevilo_online_igralcev', 'stevilo_igralcev'], 'obdelani-podatki/videoigre.csv')
+orodja.zapisi_csv(publisherji, ['naslov', 'publisher'], 'obdelani-podatki/publisherji.csv')
+orodja.zapisi_csv(platforme, ['naslov', 'platforma'], 'obdelani-podatki/platforme.csv')
+orodja.zapisi_csv(zanri, ['naslov', 'zanr'], 'obdelani-podatki/zanri.csv')
+orodja.zapisi_csv(ESRB, ['naslov', 'ESRB_deskriptor'], 'obdelani-podatki/ESRB-deskriptorji.csv')
