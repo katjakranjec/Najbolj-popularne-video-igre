@@ -32,7 +32,7 @@ vzorec_publisherja = re.compile(
 )
 
 vzorec_publisherja2 = re.compile(
-    r'>\\n\s*(?P<publisher2>.+?)\\n.*?',
+    r'>\\n\s*(?P<publisher2>.+?)\\n.*?</a>.*?',
     flags=re.DOTALL
 )
 
@@ -119,6 +119,7 @@ def izloci_podatke(vsebina):
         publisher = vzorec_publisherja.findall(vsebina)
         publisher1 = str(publisher)
         publisher2 = vzorec_publisherja2.findall(publisher1)
+        #print(publisher2)
         igra['publisher'] = publisher2
         ocena_uporabnikov = vzorec_ocene_uporabnikov.search(vsebina)
         if ocena_uporabnikov:
@@ -170,10 +171,20 @@ def izloci_gnezdene_podatke(igre):
 
     for igra in igre:
         for publisher in igra.pop('publisher'):
-            publisherji.append({'naslov': igra['naslov'], 'publisher': publisher})
+            publishers = []
+            if publisher not in publishers:
+                publishers.append(publisher)
+                publisherji.append({'naslov': igra['naslov'], 'publisher': publisher})
+            else:
+                pass
         platforme.append({'naslov': igra['naslov'], 'platforma': igra.pop('platforma')})
         for platforma in igra.pop('also_on'):
-            platforme.append({'naslov': igra['naslov'], 'platforma': platforma})
+            platforms = []
+            if platforma not in platforms:
+                platforms.append(platforma)
+                platforme.append({'naslov': igra['naslov'], 'platforma': platforma})
+            else:
+                pass
         for zanr in igra.pop('zanri'):
             zanri.append({'naslov': igra['naslov'], 'zanr': zanr})
         for deskriptor in igra.pop('ESRB_deskriptorji'):
