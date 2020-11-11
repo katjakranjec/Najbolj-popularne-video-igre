@@ -186,7 +186,12 @@ def izloci_gnezdene_podatke(igre):
             else:
                 pass
         for zanr in igra.pop('zanri'):
-            zanri.append({'naslov': igra['naslov'], 'zanr': zanr})
+            genres = []
+            if zanr not in genres:
+                genres.append(zanr)
+                zanri.append({'naslov': igra['naslov'], 'zanr': zanr})
+            else:
+                pass
         for deskriptor in igra.pop('ESRB_deskriptorji'):
             ESRB.append({'naslov': igra['naslov'], 'ESRB_deskriptor': deskriptor})
 
