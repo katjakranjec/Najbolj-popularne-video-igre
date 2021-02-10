@@ -16,6 +16,12 @@ vzorec_igre = re.compile(
 
 #r'<span class="label">Publisher:</span>\s*?<span class="data">\s*(<a href=.*?>)?\s*(?P<publisher>.+?)\s{2}.*?'
 
+
+vzorec_leta = re.compile(
+    r'<span class="label">Release Date:</span>\s*?<span class="data" >.*?(?P<leto>\d{4})</span>.*?',
+    flags=re.DOTALL
+)
+
 vzorec_metascora = re.compile(
     r'<div class="label">Metascore</div>.*?<span>(?P<metascore>\d{2})</span>.*?',
     flags=re.DOTALL
@@ -106,6 +112,8 @@ def izloci_podatke(vsebina):
         string = igra['datum'].replace(',', '')
         date = datetime.strptime(string, '%b %d %Y').date()
         igra['datum'] = date
+        leto = vzorec_leta.search(vsebina)
+        igra['leto'] = int(leto['leto'])
         metascore = vzorec_metascora.search(vsebina)
         if metascore:
             igra['metascore'] = int(metascore['metascore'])
@@ -248,7 +256,7 @@ with open(datoteka_s_slovarjem, 'r', encoding='utf-8') as f:
 publisherji, platforme, zanri, ESRB = izloci_gnezdene_podatke(seznam_slovarjev_iger)
 #print(publisherji)
 
-orodja.zapisi_csv(seznam_slovarjev_iger, ['naslov', 'datum', 'metascore', 'stevilo_glasov_metascore', 'ocena_uporabnikov', 'stevilo_glasov_uporabnikov', 'oznaka', 'developer', 'stevilo_online_igralcev', 'stevilo_igralcev'], 'obdelani-podatki/videoigre.csv')
+orodja.zapisi_csv(seznam_slovarjev_iger, ['naslov', 'datum', 'leto', 'metascore', 'stevilo_glasov_metascore', 'ocena_uporabnikov', 'stevilo_glasov_uporabnikov', 'oznaka', 'developer', 'stevilo_online_igralcev', 'stevilo_igralcev'], 'obdelani-podatki/videoigre.csv')
 orodja.zapisi_csv(publisherji, ['naslov', 'publisher'], 'obdelani-podatki/publisherji.csv')
 orodja.zapisi_csv(platforme, ['naslov', 'platforma'], 'obdelani-podatki/platforme.csv')
 orodja.zapisi_csv(zanri, ['naslov', 'zanr'], 'obdelani-podatki/zanri.csv')
